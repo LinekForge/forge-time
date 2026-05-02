@@ -175,9 +175,27 @@ server.tool(
           const entry = JSON.parse(line);
           const ts = entry.timestamp ? new Date(entry.timestamp).getTime() : 0;
           if (ts < cutoff) continue;
-          totalInWindow++;
-          if (entry.type === "user") userCount++;
-          if (entry.type === "assistant") assistantCount++;
+
+          if (entry.type === "user" && entry.message?.content) {
+            const content = entry.message.content;
+            const isToolResult = Array.isArray(content)
+              ? content.some((b: any) => b.type === "tool_result")
+              : false;
+            if (!isToolResult && typeof content === "string" && content.trim()) {
+              userCount++;
+              totalInWindow++;
+            }
+          }
+
+          if (entry.type === "assistant" && entry.message?.content) {
+            const hasText = Array.isArray(entry.message.content)
+              ? entry.message.content.some((b: any) => b.type === "text")
+              : false;
+            if (hasText) {
+              assistantCount++;
+              totalInWindow++;
+            }
+          }
         } catch {}
       }
 
