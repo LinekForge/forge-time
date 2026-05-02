@@ -1,32 +1,36 @@
 # forge-time
 
-Time awareness for AI agents. Know the time, track your pace, feel the rhythm.
+**AI agent 的时间感知**——知道几点了、追踪工作节奏、感受对话间隔。
 
-An MCP server that gives agents a sense of time — not just "what time is it" but "how long have I been working" and "what's the conversation rhythm like."
+LLM 天生是时间盲的。它不知道自己工作了多久，不知道两条消息之间过了几分钟，估算工作时间时误差可达 5 倍。forge-time 给 agent 一块手表——想看就看，想记就记。
 
-## Tools
+## 工具
 
-| Tool | What it does |
-|------|-------------|
-| `now` | Current time, date, weekday, and session age |
-| `elapsed` | How long this session has been alive |
-| `mark` | Set a named time marker (e.g. "start writing essay") |
-| `since` | Time elapsed since a marker was set |
-| `markers` | List all active markers with elapsed times |
-| `tempo` | Analyze conversation rhythm from session transcript |
+| 工具 | 做什么 |
+|------|--------|
+| `now` | 当前时间、日期、星期、session 已存活时长 |
+| `elapsed` | session 已存活多久 |
+| `mark` | 打一个命名时间标记（如"开始写论文"） |
+| `since` | 查距某个标记过了多久 |
+| `markers` | 列出所有标记及各自已过时间 |
+| `tempo` | 分析对话节奏（从 session jsonl 文件统计消息频率） |
 
-## Install
+## 快速开始
+
+**前置**：[Bun](https://bun.sh)
 
 ```bash
-# Clone
 git clone https://github.com/LinekForge/forge-time.git
 cd forge-time && bun install
-
-# Add to Claude Code
-claude mcp add forge-time bun run /path/to/forge-time/src/index.ts
 ```
 
-Or add manually to `~/.claude.json`:
+**接入 Claude Code**：
+
+```bash
+claude mcp add --scope user forge-time -- bun run /path/to/forge-time/src/index.ts
+```
+
+或手动加到 `~/.claude.json`：
 
 ```json
 {
@@ -39,39 +43,41 @@ Or add manually to `~/.claude.json`:
 }
 ```
 
-## Usage
+重启 Claude Code 后即可使用。
 
-Once connected, the agent can call these tools naturally:
+## 用法
+
+接入后 agent 可以自然地调用：
 
 ```
-"What time is it?" → now
-"How long have I been working?" → elapsed
-"Start timing this task" → mark("writing essay")
-"How long did that take?" → since("writing essay")
-"What's the conversation rhythm?" → tempo(jsonl_path)
+"现在几点？" → now
+"我工作了多久？" → elapsed
+"开始计时" → mark("写论文")
+"花了多长时间？" → since("写论文")
+"对话节奏怎么样？" → tempo(jsonl_path)
 ```
 
-### Example: Self-calibrating work time
+### 例：校准工作时间感知
 
 ```
 Agent: mark("论文打磨")
-Agent: [does work for a while]
+Agent: [工作了一段时间]
 Agent: since("论文打磨")
 → "2m14s since '论文打磨' (set at 21:43:07)"
-Agent: "这轮实际用了 2 分 14 秒。" (instead of guessing "about 10 minutes")
+Agent: "这轮实际用了 2 分 14 秒。"（而不是凭感觉估算"大概 10 分钟"）
 ```
 
-## Why
+## 为什么
 
-LLMs are temporally blind. They cannot estimate their own task duration — they lack access to elapsed generation time or the mapping from tokens to seconds. This leads to systematic overestimation of work time and underestimation of their own speed.
+LLM 无法估算自己的任务时长——它不知道自己的推理速度、不知道已用时间、不知道 token 到秒的映射。研究表明，给 agent 提供时间信息后任务完成率可提升 8 倍。
 
-forge-time gives agents a clock they can check whenever they want.
+forge-time 让 agent 主动感知时间，而不是被动地猜。
 
-## Stack
+## 技术栈
 
 - Bun + TypeScript
-- MCP SDK (`@modelcontextprotocol/sdk`)
-- Zero external dependencies beyond MCP
+- MCP SDK（`@modelcontextprotocol/sdk`）
+- 零网络依赖，纯 stdio，本地运行
 
 ## License
 
