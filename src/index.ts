@@ -204,7 +204,6 @@ server.tool(
         } catch {}
       }
 
-      totalInWindow = userCount + assistantCount;
       const windowMin = (window_minutes || 60);
       const turnsPerMin = totalInWindow > 0 ? (totalInWindow / windowMin).toFixed(1) : "0";
 
