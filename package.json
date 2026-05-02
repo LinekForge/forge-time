@@ -1,0 +1,34 @@
+{
+  "name": "forge-time",
+  "version": "0.1.0",
+  "description": "Time awareness MCP server for AI agents — know the time, track your pace, feel the rhythm.",
+  "type": "module",
+  "bin": {
+    "forge-time": "src/index.ts"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "author": "Linek & Forge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LinekForge/forge-time.git"
+  },
+  "homepage": "https://github.com/LinekForge/forge-time",
+  "license": "MIT",
+  "private": true,
+  "keywords": [
+    "mcp",
+    "claude-code",
+    "time-awareness",
+    "ai-agent",
+    "temporal"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.24.0"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts"
+  }
+}
