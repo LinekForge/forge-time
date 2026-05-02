@@ -178,27 +178,33 @@ server.tool(
 
           if (entry.type === "user" && entry.message?.content) {
             const content = entry.message.content;
-            const isToolResult = Array.isArray(content)
-              ? content.some((b: any) => b.type === "tool_result")
-              : false;
-            if (!isToolResult && typeof content === "string" && content.trim()) {
+            if (Array.isArray(content)) {
+              const hasToolResult = content.some((b: any) => b.type === "tool_result");
+              if (!hasToolResult) {
+                userCount++;
+                totalInWindow++;
+              }
+            } else if (typeof content === "string" && content.trim()) {
               userCount++;
               totalInWindow++;
             }
           }
 
           if (entry.type === "assistant" && entry.message?.content) {
-            const hasText = Array.isArray(entry.message.content)
-              ? entry.message.content.some((b: any) => b.type === "text")
-              : false;
-            if (hasText) {
-              assistantCount++;
-              totalInWindow++;
+            const content = entry.message.content;
+            if (Array.isArray(content)) {
+              const hasText = content.some((b: any) => b.type === "text");
+              const hasOnlyToolUse = content.every((b: any) => b.type === "tool_use" || b.type === "thinking");
+              if (hasText && !hasOnlyToolUse) {
+                assistantCount++;
+                totalInWindow++;
+              }
             }
           }
         } catch {}
       }
 
+      totalInWindow = userCount + assistantCount;
       const windowMin = (window_minutes || 60);
       const turnsPerMin = totalInWindow > 0 ? (totalInWindow / windowMin).toFixed(1) : "0";
 
