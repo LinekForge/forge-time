@@ -123,8 +123,33 @@ switch (cmd) {
     break;
   }
 
+  case "weather": {
+    const city = args.join(" ") || "苏州";
+    const AMAP_KEY = process.env.AMAP_KEY || "26aee0e3fe72bc9007c4afc0757640a6";
+    const cityMap: Record<string, string> = { "苏州": "320500", "上海": "310000", "北京": "110000", "杭州": "330100", "南京": "320100", "扬州": "321000", "无锡": "320200", "常州": "320400", "深圳": "440300", "广州": "440100" };
+    const adcode = cityMap[city];
+    if (!adcode) {
+      const res = await fetch(`https://restapi.amap.com/v3/config/district?keywords=${encodeURIComponent(city)}&key=${AMAP_KEY}&subdistrict=0`);
+      const data = await res.json() as any;
+      const code = data.districts?.[0]?.adcode;
+      if (!code) { console.log(`City "${city}" not found.`); break; }
+      const wres = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${code}&key=${AMAP_KEY}`);
+      const wdata = await wres.json() as any;
+      const w = wdata.lives?.[0];
+      if (!w) { console.log("Weather data unavailable."); break; }
+      console.log(`${w.city} · ${w.weather} · ${w.temperature}°C · 湿度${w.humidity}% · ${w.winddirection}风${w.windpower}级`);
+    } else {
+      const res = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${adcode}&key=${AMAP_KEY}`);
+      const data = await res.json() as any;
+      const w = data.lives?.[0];
+      if (!w) { console.log("Weather data unavailable."); break; }
+      console.log(`${w.city} · ${w.weather} · ${w.temperature}°C · 湿度${w.humidity}% · ${w.winddirection}风${w.windpower}级`);
+    }
+    break;
+  }
+
   default:
-    console.log(`forge-time v0.1.0
+    console.log(`forge-time v0.2.0
 
 Usage:
   forge-time now              Current time, date, weekday
@@ -134,5 +159,6 @@ Usage:
   forge-time markers          List all markers
   forge-time place save <name> [--city X] [--note X] [--coords X]
   forge-time place list       List saved places
-  forge-time place remove <name>`);
+  forge-time place remove <name>
+  forge-time weather [city]   Current weather (default: 苏州)`);
 }
