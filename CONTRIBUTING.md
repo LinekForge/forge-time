@@ -5,8 +5,8 @@
 ## 本地开发
 
 ```bash
-git clone https://github.com/LinekForge/forge-time.git
-cd forge-time
+git clone https://github.com/LinekForge/forge-sense.git
+cd forge-sense
 bun install
 bun run src/index.ts   # 启动 MCP server（stdin/stdout）
 ```
@@ -31,7 +31,7 @@ GitHub Issues。请带复现步骤、Bun 版本（`bun --version`）、Claude Co
 
 ## 安全问题
 
-不要发 public issue。通过 [GitHub Security Advisory](https://github.com/LinekForge/forge-time/security/advisories/new) 提交，详见 [SECURITY.md](SECURITY.md)。
+不要发 public issue。通过 [GitHub Security Advisory](https://github.com/LinekForge/forge-sense/security/advisories/new) 提交，详见 [SECURITY.md](SECURITY.md)。
 
 ## License
 

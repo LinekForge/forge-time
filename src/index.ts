@@ -30,7 +30,7 @@ function formatDate(date: Date): string {
 }
 
 const server = new McpServer({
-  name: "forge-time",
+  name: "forge-sense",
   version: "0.1.0",
 });
 

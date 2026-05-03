@@ -1,10 +1,10 @@
 {
-  "name": "forge-time",
+  "name": "forge-sense",
   "version": "0.1.0",
   "description": "Time awareness MCP server for AI agents — know the time, track your pace, feel the rhythm.",
   "type": "module",
   "bin": {
-    "forge-time": "src/index.ts"
+    "forge-sense": "src/index.ts"
   },
   "engines": {
     "bun": ">=1.0.0"
@@ -12,9 +12,9 @@
   "author": "Linek & Forge",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LinekForge/forge-time.git"
+    "url": "https://github.com/LinekForge/forge-sense.git"
   },
-  "homepage": "https://github.com/LinekForge/forge-time",
+  "homepage": "https://github.com/LinekForge/forge-sense",
   "license": "MIT",
   "private": true,
   "keywords": [

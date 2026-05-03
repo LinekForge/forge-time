@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 const PLACES_FILE = `${process.env.HOME}/.claude/places.json`;
-const MARKERS_FILE = `/tmp/forge-time-markers.json`;
+const MARKERS_FILE = `/tmp/forge-sense-markers.json`;
 
 function formatDuration(ms: number): string {
   const s = Math.floor(ms / 1000);
@@ -46,14 +46,14 @@ switch (cmd) {
   case "elapsed": {
     const markers = await loadJSON(MARKERS_FILE);
     const start = markers.__session_start;
-    if (!start) { console.log("No session start recorded. Run: forge-time mark __session_start"); break; }
+    if (!start) { console.log("No session start recorded. Run: forge-sense mark __session_start"); break; }
     console.log(`Session alive ${formatDuration(Date.now() - start)} (since ${formatTime(new Date(start))})`);
     break;
   }
 
   case "mark": {
     const name = args.join(" ");
-    if (!name) { console.log("Usage: forge-time mark <name>"); break; }
+    if (!name) { console.log("Usage: forge-sense mark <name>"); break; }
     const markers = await loadJSON(MARKERS_FILE);
     markers[name] = Date.now();
     await saveJSON(MARKERS_FILE, markers);
@@ -63,7 +63,7 @@ switch (cmd) {
 
   case "since": {
     const name = args.join(" ");
-    if (!name) { console.log("Usage: forge-time since <name>"); break; }
+    if (!name) { console.log("Usage: forge-sense since <name>"); break; }
     const markers = await loadJSON(MARKERS_FILE);
     const start = markers[name];
     if (!start) {
@@ -92,7 +92,7 @@ switch (cmd) {
 
     if (sub === "save") {
       const name = args[1];
-      if (!name) { console.log("Usage: forge-time place save <name> [--city X] [--note X] [--coords X]"); break; }
+      if (!name) { console.log("Usage: forge-sense place save <name> [--city X] [--note X] [--coords X]"); break; }
       const city = args.indexOf("--city") > -1 ? args[args.indexOf("--city") + 1] : "";
       const note = args.indexOf("--note") > -1 ? args[args.indexOf("--note") + 1] : "";
       const coords = args.indexOf("--coords") > -1 ? args[args.indexOf("--coords") + 1] : "";
@@ -111,14 +111,14 @@ switch (cmd) {
       }
     } else if (sub === "remove") {
       const name = args[1];
-      if (!name) { console.log("Usage: forge-time place remove <name>"); break; }
+      if (!name) { console.log("Usage: forge-sense place remove <name>"); break; }
       const idx = places.findIndex((p: any) => p.name === name);
       if (idx === -1) { console.log(`Place "${name}" not found.`); break; }
       places.splice(idx, 1);
       await saveJSON(PLACES_FILE, places);
       console.log(`Removed "${name}".`);
     } else {
-      console.log("Usage: forge-time place [save|list|remove]");
+      console.log("Usage: forge-sense place [save|list|remove]");
     }
     break;
   }
@@ -149,16 +149,16 @@ switch (cmd) {
   }
 
   default:
-    console.log(`forge-time v0.2.0
+    console.log(`forge-sense v0.2.0
 
 Usage:
-  forge-time now              Current time, date, weekday
-  forge-time elapsed          Session alive time
-  forge-time mark <name>      Set a time marker
-  forge-time since <name>     Time since a marker
-  forge-time markers          List all markers
-  forge-time place save <name> [--city X] [--note X] [--coords X]
-  forge-time place list       List saved places
-  forge-time place remove <name>
-  forge-time weather [city]   Current weather (default: 苏州)`);
+  forge-sense now              Current time, date, weekday
+  forge-sense elapsed          Session alive time
+  forge-sense mark <name>      Set a time marker
+  forge-sense since <name>     Time since a marker
+  forge-sense markers          List all markers
+  forge-sense place save <name> [--city X] [--note X] [--coords X]
+  forge-sense place list       List saved places
+  forge-sense place remove <name>
+  forge-sense weather [city]   Current weather (default: 苏州)`);
 }
