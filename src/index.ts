@@ -239,5 +239,110 @@ server.tool(
   }
 );
 
+// --- Places ---
+
+const PLACES_FILE = `${process.env.HOME}/.claude/places.json`;
+
+async function loadPlaces(): Promise<any[]> {
+  try {
+    const text = await Bun.file(PLACES_FILE).text();
+    return JSON.parse(text);
+  } catch {
+    return [];
+  }
+}
+
+async function savePlaces(places: any[]) {
+  await Bun.write(PLACES_FILE, JSON.stringify(places, null, 2));
+}
+
+server.tool(
+  "place_save",
+  "Save a place to your collection. Use this to bookmark locations you want to remember.",
+  {
+    name: z.string().describe("Name of the place, e.g. '仁丰里'"),
+    city: z.string().optional().describe("City, e.g. '扬州'"),
+    coords: z.string().optional().describe("Coordinates, e.g. '119.434,32.394'"),
+    note: z.string().optional().describe("A personal note about this place"),
+  },
+  async ({ name, city, coords, note }) => {
+    const places = await loadPlaces();
+    const place = {
+      name,
+      city: city || "",
+      coords: coords || "",
+      note: note || "",
+      saved_at: formatTime(new Date()),
+      saved_date: formatDate(new Date()),
+    };
+    places.push(place);
+    await savePlaces(places);
+    return {
+      content: [{
+        type: "text" as const,
+        text: `Saved "${name}"${city ? ` (${city})` : ""}${note ? ` — ${note}` : ""}`,
+      }],
+    };
+  }
+);
+
+server.tool(
+  "place_list",
+  "List all saved places.",
+  {},
+  async () => {
+    const places = await loadPlaces();
+    if (places.length === 0) {
+      return {
+        content: [{
+          type: "text" as const,
+          text: "No saved places yet.",
+        }],
+      };
+    }
+    const lines = places.map((p: any, i: number) => {
+      let line = `${i + 1}. ${p.name}`;
+      if (p.city) line += ` (${p.city})`;
+      if (p.note) line += ` — ${p.note}`;
+      if (p.saved_date) line += ` [${p.saved_date}]`;
+      return line;
+    });
+    return {
+      content: [{
+        type: "text" as const,
+        text: lines.join("\n"),
+      }],
+    };
+  }
+);
+
+server.tool(
+  "place_remove",
+  "Remove a saved place by name.",
+  {
+    name: z.string().describe("Name of the place to remove"),
+  },
+  async ({ name }) => {
+    const places = await loadPlaces();
+    const idx = places.findIndex((p: any) => p.name === name);
+    if (idx === -1) {
+      return {
+        content: [{
+          type: "text" as const,
+          text: `Place "${name}" not found.`,
+        }],
+      };
+    }
+    places.splice(idx, 1);
+    await savePlaces(places);
+    return {
+      content: [{
+        type: "text" as const,
+        text: `Removed "${name}".`,
+      }],
+    };
+  }
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
