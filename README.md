@@ -1,83 +1,87 @@
 # forge-sense
 
-**AI agent 的时间感知**——知道几点了、追踪工作节奏、感受对话间隔。
+Time and space awareness for AI agents — know the time, track your pace, sense the weather.
 
-LLM 天生是时间盲的。它不知道自己工作了多久，不知道两条消息之间过了几分钟，估算工作时间时误差可达 5 倍。forge-sense 给 agent 一块手表——想看就看，想记就记。
+LLM agents are blind to time and environment. They can't tell how long they've been working, what time it is, or what's happening outside. forge-sense gives agents a watch, a compass, and a window.
 
-## 工具
+## Modes
 
-| 工具 | 做什么 |
-|------|--------|
-| `now` | 当前时间、日期、星期、session 已存活时长 |
-| `elapsed` | session 已存活多久 |
-| `mark` | 打一个命名时间标记（如"开始写论文"） |
-| `since` | 查距某个标记过了多久 |
-| `markers` | 列出所有标记及各自已过时间 |
-| `tempo` | 分析对话节奏（从 session jsonl 文件统计消息频率） |
+forge-sense runs in two modes:
 
-## 快速开始
+| Mode | Entry | Use case |
+|------|-------|----------|
+| **CLI** | `forge-sense <command>` | Direct terminal use, low context cost |
+| **MCP** | stdio server via `src/index.ts` | Claude Code MCP integration |
 
-**前置**：[Bun](https://bun.sh)
+## Commands
+
+| Command | What it does |
+|---------|--------------|
+| `now` | Current time, date, weekday |
+| `elapsed` | How long this session has been alive |
+| `mark <name>` | Set a named time marker |
+| `since <name>` | Time elapsed since a marker |
+| `markers` | List all active markers |
+| `place save <name>` | Save a location bookmark |
+| `place list` | List saved places |
+| `place remove <name>` | Remove a saved place |
+| `weather <city>` | Current weather (requires `AMAP_KEY`) |
+
+## Quick Start
+
+**Requires**: [Bun](https://bun.sh)
 
 ```bash
 git clone https://github.com/LinekForge/forge-sense.git
 cd forge-sense && bun install
 ```
 
-**接入 Claude Code**：
+### CLI mode (recommended)
+
+```bash
+# Symlink to PATH
+ln -s "$(pwd)/src/cli.ts" ~/.local/bin/forge-sense
+
+# Use
+forge-sense now
+forge-sense mark "start coding"
+forge-sense since "start coding"
+forge-sense weather 杭州    # requires AMAP_KEY
+```
+
+### MCP mode
 
 ```bash
 claude mcp add --scope user forge-sense -- bun run /path/to/forge-sense/src/index.ts
 ```
 
-或手动加到 `~/.claude.json`：
+## Environment Variables
 
-```json
-{
-  "mcpServers": {
-    "forge-sense": {
-      "command": "bun",
-      "args": ["run", "/path/to/forge-sense/src/index.ts"]
-    }
-  }
-}
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `AMAP_KEY` | For `weather` only | Amap (高德) API key. Get one at [console.amap.com](https://console.amap.com/) |
+| `FORGE_SENSE_PLACES` | No | Custom path for places.json (default: `~/.config/forge-sense/places.json`) |
+
+## Place commands
+
+```bash
+forge-sense place save 家 --city 苏州 --note "home"
+forge-sense place save 办公室 --city 上海 --coords "121.47,31.23"
+forge-sense place list
+forge-sense place remove 办公室
 ```
 
-重启 Claude Code 后即可使用。
+## Why
 
-## 用法
+LLMs cannot estimate their own task duration — they don't know their inference speed, elapsed time, or token-to-second mapping. Giving agents time information can improve task completion rates significantly.
 
-接入后 agent 可以自然地调用：
+forge-sense lets agents actively perceive time and space, rather than guessing.
 
-```
-"现在几点？" → now
-"我工作了多久？" → elapsed
-"开始计时" → mark("写论文")
-"花了多长时间？" → since("写论文")
-"对话节奏怎么样？" → tempo(jsonl_path)
-```
-
-### 例：校准工作时间感知
-
-```
-Agent: mark("论文打磨")
-Agent: [工作了一段时间]
-Agent: since("论文打磨")
-→ "2m14s since '论文打磨' (set at 21:43:07)"
-Agent: "这轮实际用了 2 分 14 秒。"（而不是凭感觉估算"大概 10 分钟"）
-```
-
-## 为什么
-
-LLM 无法估算自己的任务时长——它不知道自己的推理速度、不知道已用时间、不知道 token 到秒的映射。研究表明，给 agent 提供时间信息后任务完成率可提升 8 倍。
-
-forge-sense 让 agent 主动感知时间，而不是被动地猜。
-
-## 技术栈
+## Tech Stack
 
 - Bun + TypeScript
-- MCP SDK（`@modelcontextprotocol/sdk`）
-- 零网络依赖，纯 stdio，本地运行
+- MCP SDK (`@modelcontextprotocol/sdk`) for MCP mode
+- Amap API for weather (CLI mode only, opt-in)
 
 ## License
 

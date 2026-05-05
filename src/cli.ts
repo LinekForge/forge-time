@@ -1,6 +1,9 @@
 #!/usr/bin/env bun
 
-const PLACES_FILE = `${process.env.HOME}/.claude/places.json`;
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+
+const PLACES_FILE = process.env.FORGE_SENSE_PLACES || `${process.env.HOME}/.config/forge-sense/places.json`;
 const MARKERS_FILE = `/tmp/forge-sense-markers.json`;
 
 function formatDuration(ms: number): string {
@@ -31,6 +34,7 @@ async function loadJSON(path: string): Promise<any> {
 }
 
 async function saveJSON(path: string, data: any) {
+  mkdirSync(dirname(path), { recursive: true });
   await Bun.write(path, JSON.stringify(data, null, 2));
 }
 
@@ -124,31 +128,29 @@ switch (cmd) {
   }
 
   case "weather": {
-    const city = args.join(" ") || "苏州";
+    const city = args.join(" ");
+    if (!city) {
+      console.log("Usage: forge-sense weather <city>");
+      break;
+    }
     const AMAP_KEY = process.env.AMAP_KEY;
     if (!AMAP_KEY) {
       console.log("AMAP_KEY environment variable is required. Get one at https://console.amap.com/");
       break;
     }
-    const cityMap: Record<string, string> = { "苏州": "320500", "上海": "310000", "北京": "110000", "杭州": "330100", "南京": "320100", "扬州": "321000", "无锡": "320200", "常州": "320400", "深圳": "440300", "广州": "440100" };
-    const adcode = cityMap[city];
+    const cityMap: Record<string, string> = { "上海": "310000", "北京": "110000", "杭州": "330100", "南京": "320100", "苏州": "320500", "扬州": "321000", "无锡": "320200", "常州": "320400", "深圳": "440300", "广州": "440100" };
+    let adcode = cityMap[city];
     if (!adcode) {
       const res = await fetch(`https://restapi.amap.com/v3/config/district?keywords=${encodeURIComponent(city)}&key=${AMAP_KEY}&subdistrict=0`);
       const data = await res.json() as any;
-      const code = data.districts?.[0]?.adcode;
-      if (!code) { console.log(`City "${city}" not found.`); break; }
-      const wres = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${code}&key=${AMAP_KEY}`);
-      const wdata = await wres.json() as any;
-      const w = wdata.lives?.[0];
-      if (!w) { console.log("Weather data unavailable."); break; }
-      console.log(`${w.city} · ${w.weather} · ${w.temperature}°C · 湿度${w.humidity}% · ${w.winddirection}风${w.windpower}级`);
-    } else {
-      const res = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${adcode}&key=${AMAP_KEY}`);
-      const data = await res.json() as any;
-      const w = data.lives?.[0];
-      if (!w) { console.log("Weather data unavailable."); break; }
-      console.log(`${w.city} · ${w.weather} · ${w.temperature}°C · 湿度${w.humidity}% · ${w.winddirection}风${w.windpower}级`);
+      adcode = data.districts?.[0]?.adcode;
+      if (!adcode) { console.log(`City "${city}" not found.`); break; }
     }
+    const res = await fetch(`https://restapi.amap.com/v3/weather/weatherInfo?city=${adcode}&key=${AMAP_KEY}`);
+    const data = await res.json() as any;
+    const w = data.lives?.[0];
+    if (!w) { console.log("Weather data unavailable."); break; }
+    console.log(`${w.city} · ${w.weather} · ${w.temperature}°C · 湿度${w.humidity}% · ${w.winddirection}风${w.windpower}级`);
     break;
   }
 

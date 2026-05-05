@@ -31,7 +31,7 @@ function formatDate(date: Date): string {
 
 const server = new McpServer({
   name: "forge-sense",
-  version: "0.1.0",
+  version: "0.2.0",
 });
 
 server.tool(
@@ -241,7 +241,7 @@ server.tool(
 
 // --- Places ---
 
-const PLACES_FILE = `${process.env.HOME}/.claude/places.json`;
+const PLACES_FILE = process.env.FORGE_SENSE_PLACES || `${process.env.HOME}/.config/forge-sense/places.json`;
 
 async function loadPlaces(): Promise<any[]> {
   try {

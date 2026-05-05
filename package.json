@@ -1,10 +1,10 @@
 {
   "name": "forge-sense",
-  "version": "0.1.0",
-  "description": "Time awareness MCP server for AI agents — know the time, track your pace, feel the rhythm.",
+  "version": "0.2.0",
+  "description": "Time and space awareness for AI agents — know the time, track your pace, sense the weather.",
   "type": "module",
   "bin": {
-    "forge-sense": "src/index.ts"
+    "forge-sense": "src/cli.ts"
   },
   "engines": {
     "bun": ">=1.0.0"
