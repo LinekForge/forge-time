@@ -125,7 +125,11 @@ switch (cmd) {
 
   case "weather": {
     const city = args.join(" ") || "苏州";
-    const AMAP_KEY = process.env.AMAP_KEY || "26aee0e3fe72bc9007c4afc0757640a6";
+    const AMAP_KEY = process.env.AMAP_KEY;
+    if (!AMAP_KEY) {
+      console.log("AMAP_KEY environment variable is required. Get one at https://console.amap.com/");
+      break;
+    }
     const cityMap: Record<string, string> = { "苏州": "320500", "上海": "310000", "北京": "110000", "杭州": "330100", "南京": "320100", "扬州": "321000", "无锡": "320200", "常州": "320400", "深圳": "440300", "广州": "440100" };
     const adcode = cityMap[city];
     if (!adcode) {
